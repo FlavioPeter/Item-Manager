@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
@@ -22,20 +24,28 @@ import itemmanager.dto.ItemCategory;
  * @author Flavio Silva
  *
  */
-public class ItemManagerDaoFileImpl {
+public class ItemManagerDaoFileImpl implements ItemManagerDao {
 	
 	private Map<String, Item> items = new TreeMap<>();
 	
-	private static final String ITEMS_FILE = "items.txt";
+	private final String ITEMS_FILE;
 	private static final String DELIMITER = "::";
+	
+	public ItemManagerDaoFileImpl() {
+		ITEMS_FILE = "items.txt";
+	}
+	
+	public ItemManagerDaoFileImpl(String txtFile) {
+		ITEMS_FILE = txtFile;
+	}
 	
 	private Item unmarshallItems(String itemAsText) {
 		String[] itemTokens = itemAsText.split(DELIMITER);
 		
 		String itemId = itemTokens[0];
 		
-		Item item = new Item(itemTokens[0]);
-
+		Item item = new Item(itemId);
+		
 		item.setName(itemTokens[1]);
 		
 		item.setType(ItemCategory.valueOf(itemTokens[2]));
@@ -48,7 +58,7 @@ public class ItemManagerDaoFileImpl {
 		
 	}
 	
-	private void loadItem() throws ItemManagerPersistenceException {
+	private void loadItems() throws ItemManagerPersistenceException {
 		Scanner scanner;
 		
 		try {
@@ -85,7 +95,7 @@ public class ItemManagerDaoFileImpl {
 		return itemAsText += item.getWeight();
 	}
 	
-	public void writeItems(Map<String, Item> items) throws ItemManagerPersistenceException, IOException {
+	private void writeItems(Map<String, Item> items) throws ItemManagerPersistenceException, IOException {
 		
 		PrintWriter scanner;
 		
@@ -101,4 +111,33 @@ public class ItemManagerDaoFileImpl {
 		
 		scanner.close();
 	}
+	
+	@Override
+	public List<Item> getAllItems() throws ItemManagerPersistenceException {
+		loadItems();
+		return new ArrayList<Item>(items.values());
+	}
+	
+	@Override
+	public Item getItem(String itemId) throws ItemManagerPersistenceException {
+		loadItems();
+		return items.get(itemId);
+	}
+	
+	@Override
+	public Item addItem(String itemId, Item item) throws ItemManagerPersistenceException, IOException {
+		loadItems();
+		Item newItem = items.put(itemId, item);
+		writeItems(items);
+		return newItem;
+	}
+	
+	@Override
+	public Item removeItem(String itemId) throws ItemManagerPersistenceException, IOException {
+		loadItems();
+		Item removedItem = items.remove(itemId);
+		writeItems(items);
+		return removedItem;
+	}
+	
 }

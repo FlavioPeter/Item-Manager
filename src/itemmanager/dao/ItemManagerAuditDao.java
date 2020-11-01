@@ -9,4 +9,6 @@ package itemmanager.dao;
  */
 public interface ItemManagerAuditDao {
 
+	public void writeAuditEntry(String entry) throws ItemManagerPersistenceException;
+	
 }

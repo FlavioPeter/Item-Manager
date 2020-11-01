@@ -8,5 +8,5 @@ package itemmanager.dto;
  *
  */
 public enum ItemCategory {
-
+	CLOTHING, ELECTRONIC, FURNITURE, OTHER, ALL, NONE;
 }
